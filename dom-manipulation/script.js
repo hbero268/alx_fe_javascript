@@ -1,4 +1,4 @@
-// ===== Dynamic Quote Generator Script =====
+// ===== Dynamic Quote Generator with Server Sync =====
 
 const quoteDisplay = document.getElementById('quoteDisplay');
 const categoryFilter = document.getElementById('categoryFilter');
@@ -9,6 +9,7 @@ const newQuoteCategory = document.getElementById('newQuoteCategory');
 const exportJsonBtn = document.getElementById('exportJsonBtn');
 const importFileInput = document.getElementById('importFile');
 const clearStorageBtn = document.getElementById('clearStorageBtn');
+const syncServerBtn = document.getElementById('syncServerBtn');
 const messageEl = document.getElementById('message');
 
 let quotes = [];
@@ -166,6 +167,38 @@ function clearStoredQuotes() {
   showMessage('Local storage cleared.', 'success');
 }
 
+// ===== Simulate Server Sync =====
+async function syncWithServer() {
+  showMessage('Syncing with server...', 'info');
+  try {
+    // Simulate server fetch: JSONPlaceholder posts endpoint (you can replace with your own)
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
+    const serverData = await response.json();
+
+    let updated = 0;
+
+    serverData.forEach(post => {
+      const exists = quotes.some(q => q.text === post.title && q.category === 'Server');
+      if (!exists) {
+        quotes.push({ text: post.title, category: 'Server' }); // server category
+        updated++;
+      }
+    });
+
+    if (updated > 0) {
+      saveQuotes();
+      populateCategories();
+      filterQuotes();
+      showMessage(`Server sync completed. ${updated} new quote(s) added.`, 'success');
+    } else {
+      showMessage('Server sync completed. No new quotes.', 'info');
+    }
+
+  } catch (err) {
+    showMessage('Server sync failed.', 'error');
+  }
+}
+
 // ===== Initialize App =====
 function init() {
   loadQuotes();
@@ -181,7 +214,11 @@ function init() {
     importFileInput.value = '';
   });
   clearStorageBtn.addEventListener('click', clearStoredQuotes);
+  syncServerBtn.addEventListener('click', syncWithServer);
   categoryFilter.addEventListener('change', filterQuotes);
+
+  // Periodic server sync every 60 seconds
+  setInterval(syncWithServer, 60000);
 }
 
 window.onload = init;
