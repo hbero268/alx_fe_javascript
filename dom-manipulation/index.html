@@ -1,70 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dynamic Quote Generator</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dynamic Quote Generator - Web Storage & JSON</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f7f8fa;
-      text-align: center;
-    }
-    h1 {
-      color: #333;
-    }
-    #quoteDisplay {
-      margin: 20px auto;
-      padding: 20px;
-      width: 60%;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      font-size: 1.2em;
-      min-height: 60px;
-    }
-    .category-filter {
-      margin-bottom: 20px;
-    }
-    input, select, button {
-      margin: 5px;
-      padding: 8px;
-      font-size: 1em;
-    }
-    button {
-      cursor: pointer;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-    button:hover {
-      background: #555;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f7f8fa; text-align: center; }
+    h1 { color: #333; }
+    #quoteDisplay { margin:20px auto; padding:20px; width:70%; background:#fff; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); min-height:70px; }
+    .controls { margin: 8px 0; }
+    input, select, button { margin: 6px; padding:8px; font-size:1em; }
+    button { cursor:pointer; background:#333; color:#fff; border:none; border-radius:5px; }
+    button:hover { background:#555; }
+    #message { margin-top:10px; min-height:20px; }
+    #formContainer { margin-top: 12px; }
+    .small { font-size:0.9em; color:#666; }
   </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
 
-  <!-- Category Selector -->
-  <div class="category-filter">
-    <label for="categorySelect">Choose Category:</label>
-    <select id="categorySelect">
-      <option value="all">All</option>
-    </select>
+  <div class="controls">
+    <label for="categorySelect">Category:</label>
+    <select id="categorySelect"><option value="all">All</option></select>
+    <button id="newQuote">Show New Quote</button>
   </div>
 
-  <!-- Quote Display Area -->
   <div id="quoteDisplay">Click “Show New Quote” to get inspired!</div>
-  <button id="newQuote">Show New Quote</button>
 
-  <!-- Add New Quote Section -->
-  <div>
-    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+  <div id="formContainer">
+    <input id="newQuoteText" type="text" placeholder="Enter a new quote" size="50" />
     <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
     <button id="addQuoteBtn">Add Quote</button>
   </div>
+
+  <div class="controls" style="margin-top:14px;">
+    <button id="exportJsonBtn">Export Quotes (.json)</button>
+    <input type="file" id="importFile" accept=".json" />
+    <button id="clearStorageBtn">Clear Stored Quotes</button>
+  </div>
+
+  <div id="message" class="small" aria-live="polite"></div>
 
   <script src="script.js"></script>
 </body>
