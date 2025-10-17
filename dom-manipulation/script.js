@@ -1,3 +1,7 @@
+// ==========================
+// Dynamic Quote Generator
+// ==========================
+
 // Initial quotes array
 let quotes = [
   { text: "The best way to get started is to quit talking and begin doing.", category: "Motivation" },
@@ -13,34 +17,50 @@ const newQuoteText = document.getElementById("newQuoteText");
 const newQuoteCategory = document.getElementById("newQuoteCategory");
 const categorySelect = document.getElementById("categorySelect");
 
-// Function to show random quote
+// ==========================
+// Show Random Quote
+// ==========================
 function showRandomQuote() {
   const selectedCategory = categorySelect.value;
   let filteredQuotes = quotes;
 
+  // Filter by selected category
   if (selectedCategory !== "all") {
-    filteredQuotes = quotes.filter(q => q.category.toLowerCase() === selectedCategory.toLowerCase());
+    filteredQuotes = quotes.filter(
+      q => q.category.toLowerCase() === selectedCategory.toLowerCase()
+    );
   }
 
+  // Handle empty category
   if (filteredQuotes.length === 0) {
-    quoteDisplay.textContent = "No quotes available for this category.";
+    quoteDisplay.innerHTML = `<em>No quotes available for this category.</em>`;
     return;
   }
 
+  // Pick random quote
   const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
-  quoteDisplay.textContent = `"${filteredQuotes[randomIndex].text}" — ${filteredQuotes[randomIndex].category}`;
+  const randomQuote = filteredQuotes[randomIndex];
+
+  // Display quote using innerHTML
+  quoteDisplay.innerHTML = `
+    <p>"${randomQuote.text}"</p>
+    <small>— <strong>${randomQuote.category}</strong></small>
+  `;
 }
 
-// Function to add a new quote
+// ==========================
+// Add New Quote
+// ==========================
 function addQuote() {
   const text = newQuoteText.value.trim();
   const category = newQuoteCategory.value.trim();
 
   if (!text || !category) {
-    alert("Please enter both quote text and category.");
+    quoteDisplay.innerHTML = `<em style="color:red;">⚠️ Please enter both quote text and category.</em>`;
     return;
   }
 
+  // Add to quotes array
   quotes.push({ text, category });
 
   // Add new category to dropdown if it doesn't exist
@@ -55,13 +75,17 @@ function addQuote() {
     categorySelect.appendChild(newOption);
   }
 
+  // Clear inputs
   newQuoteText.value = "";
   newQuoteCategory.value = "";
 
-  alert("Quote added successfully!");
+  // Show success message
+  quoteDisplay.innerHTML = `<em style="color:green;">✅ Quote added successfully! Click "Show New Quote" to see it.</em>`;
 }
 
-// Populate initial categories in dropdown
+// ==========================
+// Populate Categories
+// ==========================
 function populateCategories() {
   const categories = [...new Set(quotes.map(q => q.category))];
   categories.forEach(cat => {
@@ -72,9 +96,11 @@ function populateCategories() {
   });
 }
 
+// ==========================
 // Event Listeners
+// ==========================
 newQuoteBtn.addEventListener("click", showRandomQuote);
 addQuoteBtn.addEventListener("click", addQuote);
 
-// Initialize
+// Initialize on load
 populateCategories();
