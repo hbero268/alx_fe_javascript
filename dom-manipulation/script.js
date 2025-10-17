@@ -229,4 +229,11 @@ function init() {
     importFileInput.value = '';
   });
   clearStorageBtn.addEventListener('click', clearStoredQuotes);
-  syncServerBtn.addEventListener('click', syncQuotes
+  syncServerBtn.addEventListener('click', syncQuotes);
+  categoryFilter.addEventListener('change', filterQuotes);
+
+  // Periodic sync every 60 seconds
+  setInterval(syncQuotes, 60000);
+}
+
+window.onload = init;
