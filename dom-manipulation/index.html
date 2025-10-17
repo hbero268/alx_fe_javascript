@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dynamic Quote Generator - Web Storage & JSON</title>
+  <title>Dynamic Quote Generator - Filtering System</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f7f8fa; text-align: center; }
     h1 { color: #333; }
@@ -20,25 +20,33 @@
 <body>
   <h1>Dynamic Quote Generator</h1>
 
+  <!-- FILTER SECTION -->
   <div class="controls">
-    <label for="categorySelect">Category:</label>
-    <select id="categorySelect"><option value="all">All</option></select>
+    <label for="categoryFilter">Category:</label>
+    <select id="categoryFilter">
+      <option value="all">All Categories</option>
+    </select>
     <button id="newQuote">Show New Quote</button>
   </div>
 
+  <!-- DISPLAY QUOTE -->
   <div id="quoteDisplay">Click “Show New Quote” to get inspired!</div>
 
+  <!-- ADD QUOTE FORM -->
   <div id="formContainer">
     <input id="newQuoteText" type="text" placeholder="Enter a new quote" size="50" />
     <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
     <button id="addQuoteBtn">Add Quote</button>
   </div>
 
+  <!-- JSON IMPORT/EXPORT (Optional for Task 1) -->
+  <!--
   <div class="controls" style="margin-top:14px;">
     <button id="exportJsonBtn">Export Quotes (.json)</button>
     <input type="file" id="importFile" accept=".json" />
     <button id="clearStorageBtn">Clear Stored Quotes</button>
   </div>
+  -->
 
   <div id="message" class="small" aria-live="polite"></div>
 
