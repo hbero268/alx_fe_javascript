@@ -1,4 +1,4 @@
-// ===== Dynamic Quote Generator with Server Sync =====
+// ===== Dynamic Quote Generator with Server Sync & Conflict Resolution =====
 
 const quoteDisplay = document.getElementById('quoteDisplay');
 const categoryFilter = document.getElementById('categoryFilter');
@@ -72,14 +72,13 @@ function populateCategories() {
     categoryFilter.appendChild(opt);
   });
 
-  // Restore last selected category
   const lastFilter = localStorage.getItem('lastSelectedCategory');
   if (lastFilter && [...categoryFilter.options].some(o => o.value === lastFilter)) {
     categoryFilter.value = lastFilter;
   }
 }
 
-// ===== Filter and Display Quotes =====
+// ===== Display Filtered Quotes =====
 function filterQuotes() {
   const selectedCategory = categoryFilter.value;
   localStorage.setItem('lastSelectedCategory', selectedCategory);
@@ -102,7 +101,7 @@ function filterQuotes() {
   showMessage(`Showing quote from "${q.category}" category.`, 'info');
 }
 
-// ===== Add New Quote =====
+// ===== Add Quote =====
 function addQuote() {
   const text = newQuoteText.value.trim();
   const category = newQuoteCategory.value.trim();
@@ -122,7 +121,7 @@ function addQuote() {
   showMessage('✅ Quote added successfully!', 'success');
 }
 
-// ===== Export Quotes as JSON =====
+// ===== Export/Import/Reset =====
 function exportQuotesAsJson() {
   const dataStr = JSON.stringify(quotes, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
@@ -135,7 +134,6 @@ function exportQuotesAsJson() {
   showMessage('Export started.', 'success');
 }
 
-// ===== Import Quotes from JSON File =====
 function importFromJsonFile(file) {
   const reader = new FileReader();
   reader.onload = e => {
@@ -149,14 +147,13 @@ function importFromJsonFile(file) {
       populateCategories();
       filterQuotes();
       showMessage('Quotes imported successfully.', 'success');
-    } catch (err) {
+    } catch {
       showMessage('Failed to import file.', 'error');
     }
   };
   reader.readAsText(file);
 }
 
-// ===== Clear Local Storage =====
 function clearStoredQuotes() {
   if (!confirm('This will clear all stored quotes. Continue?')) return;
   localStorage.removeItem('quotes');
@@ -167,35 +164,53 @@ function clearStoredQuotes() {
   showMessage('Local storage cleared.', 'success');
 }
 
-// ===== Simulate Server Sync =====
-async function syncWithServer() {
-  showMessage('Syncing with server...', 'info');
+// ===== SERVER SYNC & CONFLICT RESOLUTION =====
+async function fetchQuotesFromServer() {
   try {
-    // Simulate server fetch: JSONPlaceholder posts endpoint (you can replace with your own)
     const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
-    const serverData = await response.json();
+    const data = await response.json();
+    return data.map(post => ({ text: post.title, category: 'Server' }));
+  } catch {
+    showMessage('Failed to fetch from server.', 'error');
+    return [];
+  }
+}
 
-    let updated = 0;
-
-    serverData.forEach(post => {
-      const exists = quotes.some(q => q.text === post.title && q.category === 'Server');
-      if (!exists) {
-        quotes.push({ text: post.title, category: 'Server' }); // server category
-        updated++;
-      }
+async function postQuoteToServer(quote) {
+  try {
+    await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      body: JSON.stringify(quote),
+      headers: { 'Content-type': 'application/json; charset=UTF-8' }
     });
+  } catch {
+    showMessage('Failed to post quote to server.', 'error');
+  }
+}
 
-    if (updated > 0) {
-      saveQuotes();
-      populateCategories();
-      filterQuotes();
-      showMessage(`Server sync completed. ${updated} new quote(s) added.`, 'success');
-    } else {
-      showMessage('Server sync completed. No new quotes.', 'info');
+// Merge server data into localStorage with conflict resolution
+async function syncQuotes() {
+  showMessage('Syncing with server...', 'info');
+  const serverQuotes = await fetchQuotesFromServer();
+
+  let updates = 0;
+
+  serverQuotes.forEach(sq => {
+    const exists = quotes.some(lq => lq.text === sq.text && lq.category === sq.category);
+    if (!exists) {
+      quotes.push(sq);
+      updates++;
     }
+  });
 
-  } catch (err) {
-    showMessage('Server sync failed.', 'error');
+  saveQuotes();
+  populateCategories();
+  filterQuotes();
+
+  if (updates > 0) {
+    showMessage(`Server sync completed. ${updates} new quote(s) added.`, 'success');
+  } else {
+    showMessage('Server sync completed. No new quotes.', 'info');
   }
 }
 
@@ -214,11 +229,4 @@ function init() {
     importFileInput.value = '';
   });
   clearStorageBtn.addEventListener('click', clearStoredQuotes);
-  syncServerBtn.addEventListener('click', syncWithServer);
-  categoryFilter.addEventListener('change', filterQuotes);
-
-  // Periodic server sync every 60 seconds
-  setInterval(syncWithServer, 60000);
-}
-
-window.onload = init;
+  syncServerBtn.addEventListener('click', syncQuotes
